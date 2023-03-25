@@ -1,0 +1,17 @@
+{
+  "name": "be-shopping-site",
+  "version": "1.0.0",
+  "description": "The application supports the backend infrastructure for the shopping site",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Karan Aneja",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "mongoose": "^7.0.3"
+  }
+}
