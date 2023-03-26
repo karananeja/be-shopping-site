@@ -9,7 +9,7 @@ const app = express();
 
 // Setting up the port and database connection url
 const port = process.env.NODE_APP_PORT || 4000;
-const mongoDbURI = `mongodb+srv://admin:${process.env.NODE_DB_CONNECTION_PASSWORD}@cluster0.4e0w61l.mongodb.net/?retryWrites=true&w=majority`;
+const mongoDbURI = `mongodb+srv://admin:${process.env.NODE_DB_CONNECTION_PASSWORD}@cluster0.4e0w61l.mongodb.net/${process.env.NODE_DB_NAME}?retryWrites=true&w=majority`;
 
 // Setting up the database with Mongoose
 mongoose.connect(mongoDbURI, {
