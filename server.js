@@ -30,7 +30,7 @@ app.use(cors());
 
 // Simple get request
 app.get('/', (req, res) => {
-  res.status(200).send({ msg: 'Hello World' });
+  res.status(405).send('Method Not allowed');
 });
 
 // Server started on the required port
