@@ -7,6 +7,16 @@ require('dotenv').config();
 // Initializing the application
 const app = express();
 
+// Middleware
+app.use(express.json());
+app.use(cors());
+
+// Importing the route files
+const usersRouter = require('./routes/users');
+
+// API endpoints
+app.use('/users', usersRouter);
+
 // Setting up the port and database connection url
 const port = process.env.NODE_APP_PORT || 4000;
 const mongoDbURI = `mongodb+srv://admin:${process.env.NODE_DB_CONNECTION_PASSWORD}@cluster0.4e0w61l.mongodb.net/${process.env.NODE_DB_NAME}?retryWrites=true&w=majority`;
@@ -23,10 +33,6 @@ const connection = mongoose.connection;
 connection.on('open', () => {
   console.log('Connection is set up with MongoDB');
 });
-
-// Middleware
-app.use(express.json());
-app.use(cors());
 
 // Simple get request
 app.get('/', (req, res) => {
