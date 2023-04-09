@@ -17,12 +17,16 @@ const userEmailSchema = new Schema(
       },
       required: [true, 'Email required'],
     },
+    accessToken: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const User = mongoose.model('userEmail', userEmailSchema);
+const UserEmail = mongoose.model('userEmail', userEmailSchema);
 
-module.exports = User;
+module.exports = UserEmail;

@@ -12,10 +12,10 @@ app.use(express.json());
 app.use(cors());
 
 // Importing the route files
-const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/signup');
 
 // API endpoints
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 
 // Setting up the port and database connection url
 const port = process.env.NODE_APP_PORT || 4000;
@@ -35,7 +35,7 @@ connection.on('open', () => {
 });
 
 // Simple get request
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.status(405).send('Method Not allowed');
 });
 
