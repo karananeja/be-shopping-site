@@ -12,10 +12,12 @@ app.use(express.json());
 app.use(cors());
 
 // Importing the route files
-const usersRouter = require('./routes/signup');
+const usersSignUpRouter = require('./routes/signup');
+const usersSignInRouter = require('./routes/signin');
 
 // API endpoints
-app.use('/user', usersRouter);
+app.use('/api/v1', usersSignUpRouter);
+app.use('/api/v1', usersSignInRouter);
 
 // Setting up the port and database connection url
 const port = process.env.NODE_APP_PORT || 4000;
