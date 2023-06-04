@@ -1,41 +1,49 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 let UserEmail = require('../models/userEmailModel');
-
-// get all the users registered
-router.route('/').get((_, res) => {
-  UserEmail.find()
-    .then((users) => res.json(users))
-    .catch((err) => res.status(400).json({ err }));
-});
+const responseStructure = require('../utils/helpers');
 
 // add a new user entry
-router.route('/v1/register').post((req, res) => {
-  const user = { email: req.body.email };
+router.route('/user/register').post(async (req, res) => {
+  const { body: user } = req;
+  let { email, password } = user;
 
-  const accessToken = jwt.sign(user, process.env.NODE_ACCESS_TOKEN_SECRET);
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  password = hashedPassword;
 
-  // const newUserEmail = new UserEmail({ ...user, accessToken });
+  const accessToken = jwt.sign(
+    { email },
+    process.env.NODE_ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: 24 * 60 * 60 * 30,
+    }
+  );
 
-  // newUserEmail    .save()    .then(() =>
-  res.json({ msg: 'User registered!', userInfo: { ...user, accessToken } });
-  // )    .catch((err) => res.status(400).json({ err }));
-});
+  user.accessToken = accessToken;
 
-// set user password
-router.route('/v1/password/set').post((req, res) => {
-  const accessToken = req.headers.authorization.split(' ')[1];
+  const newUserEmail = new UserEmail({ email, password, accessToken });
 
-  console.log({ accessToken, body: req.body });
-
-  // const newUserEmail = new UserEmail({ ...user, accessToken });
-
-  // newUserEmail    .save()    .then(() =>
-  res.json({
-    msg: 'User Password registered!',
-    userInfo: { accessToken, body: req.body },
-  });
-  // )    .catch((err) => res.status(400).json({ err }));
+  newUserEmail
+    .save()
+    .then(() =>
+      responseStructure({
+        res,
+        statusCode: 200,
+        data: { msg: 'User registered!', userInfo: { email, accessToken } },
+      })
+    )
+    .catch(() =>
+      responseStructure({
+        res,
+        statusCode: 400,
+        data: {
+          err: 'EMAIL_ID_NOT_UNIQUE',
+          errmessage: 'User has already registered',
+        },
+      })
+    );
 });
 
 module.exports = router;
