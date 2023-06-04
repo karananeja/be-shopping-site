@@ -32,9 +32,7 @@ mongoose.connect(mongoDbURI, {
 // Connecting to the database
 const connection = mongoose.connection;
 
-connection.on('open', () => {
-  console.log('Connection is set up with MongoDB');
-});
+connection.on('open', () => console.log('Connection is set up with MongoDB'));
 
 // Simple get request
 app.get('/', (_, res) => {
@@ -42,6 +40,4 @@ app.get('/', (_, res) => {
 });
 
 // Server started on the required port
-app.listen(port, () => {
-  console.log(`The port is listening on ${port}`);
-});
+app.listen(port, () => console.log(`The port is listening on ${port}`));
