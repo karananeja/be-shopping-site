@@ -16,9 +16,7 @@ router.route('/user/register').post(async (req, res) => {
   const accessToken = jwt.sign(
     { email },
     process.env.NODE_ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: 24 * 60 * 60 * 30,
-    }
+    { expiresIn: 24 * 60 * 60 * 30 }
   );
 
   user.accessToken = accessToken;

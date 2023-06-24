@@ -35,9 +35,7 @@ const connection = mongoose.connection;
 connection.on('open', () => console.log('Connection is set up with MongoDB'));
 
 // Simple get request
-app.get('/', (_, res) => {
-  res.status(405).send('Method Not allowed');
-});
+app.get('/', (_, res) => res.status(405).send('Method Not allowed'));
 
 // Server started on the required port
 app.listen(port, () => console.log(`The port is listening on ${port}`));
