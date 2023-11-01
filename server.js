@@ -14,11 +14,13 @@ app.use(cors());
 // Importing the route files
 const usersSignUpRouter = require('./routes/signup');
 const usersSignInRouter = require('./routes/signin');
+const userDetailsRouter = require('./routes/users');
 const utils = require('./routes/utils');
 
 // API endpoints
 app.use('/api/v1', usersSignUpRouter);
 app.use('/api/v1', usersSignInRouter);
+app.use('/api/v1', userDetailsRouter);
 app.use('/api/v1', utils);
 
 // Setting up the port and database connection url
