@@ -28,7 +28,6 @@ router.route('/user/register').post(async (req, res) => {
     .then(() =>
       responseStructure({
         res,
-        statusCode: 200,
         data: { msg: 'User registered!', userInfo: { email, accessToken } },
       })
     )
@@ -38,7 +37,7 @@ router.route('/user/register').post(async (req, res) => {
         statusCode: 400,
         data: {
           err: 'EMAIL_ID_NOT_UNIQUE',
-          errmessage: 'User has already registered',
+          errMessage: 'User has already registered',
         },
       })
     );

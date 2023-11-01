@@ -27,7 +27,6 @@ router.route('/user/get-token').post((req, res) => {
             .then(() =>
               responseStructure({
                 res,
-                statusCode: 200,
                 data: {
                   msg: 'User credentials matched',
                   userInfo: {
@@ -43,27 +42,27 @@ router.route('/user/get-token').post((req, res) => {
                 statusCode: 400,
                 data: {
                   err: 'USER_NOT_FOUND',
-                  errmessage: 'User has not registered',
+                  errMessage: 'User has not registered',
                 },
               })
             );
         } else {
-          responseStructure({
+          return responseStructure({
             res,
             statusCode: 401,
             data: {
               err: 'INVALID_CREDENTIALS',
-              errmessage: 'Invalid credentials',
+              errMessage: 'Invalid credentials',
             },
           });
         }
       } else {
-        responseStructure({
+        return responseStructure({
           res,
           statusCode: 400,
           data: {
             err: 'USER_NOT_FOUND',
-            errmessage: `User has not registered or doesn't exists`,
+            errMessage: `User has not registered or doesn't exists`,
           },
         });
       }
@@ -74,7 +73,7 @@ router.route('/user/get-token').post((req, res) => {
         statusCode: 400,
         data: {
           err: 'INVALID_REQUEST',
-          errmessage: 'Please contact support for assistance',
+          errMessage: 'Please contact support for assistance',
         },
       })
     );
