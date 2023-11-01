@@ -10,24 +10,16 @@ const userEmailSchema = new Schema(
       lowercase: true,
       unique: true,
       validate: {
-        validator: (email) => {
-          return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
-        },
+        validator: (email) =>
+          /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email),
         message: 'Please enter a valid email',
       },
       required: [true, 'Email required'],
     },
-    accessToken: {
-      type: String,
-      trim: true,
-    },
-    password: {
-      type: String,
-    },
+    accessToken: { type: String, trim: true },
+    password: { type: String },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const UserEmail = mongoose.model('userEmail', userEmailSchema);
