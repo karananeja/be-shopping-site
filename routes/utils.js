@@ -6,9 +6,9 @@ const countryList = require('../utils/constants');
 router.route('/country-list').get((req, res) => {
   const accessToken = req.headers.authorization?.split(' ')[1];
 
-  UserEmail.findOne({ accessToken: accessToken }).then((userFound) => {
+  UserEmail.findOne({ accessToken }).then((userFound) => {
     if (!userFound || userFound === null) {
-      responseStructure({
+      return responseStructure({
         res,
         statusCode: 400,
         data: {
@@ -17,12 +17,9 @@ router.route('/country-list').get((req, res) => {
         },
       });
     } else {
-      responseStructure({
+      return responseStructure({
         res,
-        data: {
-          countryList,
-          msg: 'Country List fetched successfully',
-        },
+        data: { countryList, msg: 'Country List fetched successfully' },
       });
     }
   });
