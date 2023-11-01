@@ -4,7 +4,7 @@ const responseStructure = require('../utils/helpers');
 const countryList = require('../utils/constants');
 
 router.route('/country-list').get((req, res) => {
-  const accessToken = req.headers.authorization.split(' ')[1];
+  const accessToken = req.headers.authorization?.split(' ')[1];
 
   UserEmail.findOne({ accessToken: accessToken }).then((userFound) => {
     if (!userFound || userFound === null) {
