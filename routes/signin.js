@@ -27,7 +27,6 @@ router.route('/user/get-token').post((req, res) => {
             .then(() =>
               responseStructure({
                 res,
-                statusCode: 200,
                 data: {
                   msg: 'User credentials matched',
                   userInfo: {
@@ -48,7 +47,7 @@ router.route('/user/get-token').post((req, res) => {
               })
             );
         } else {
-          responseStructure({
+          return responseStructure({
             res,
             statusCode: 401,
             data: {
@@ -58,7 +57,7 @@ router.route('/user/get-token').post((req, res) => {
           });
         }
       } else {
-        responseStructure({
+        return responseStructure({
           res,
           statusCode: 400,
           data: {
