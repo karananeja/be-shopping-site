@@ -37,6 +37,6 @@ const errMessages = {
   },
 };
 
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
 module.exports = { countryList, EMAIL_REGEX, environment, errMessages };
