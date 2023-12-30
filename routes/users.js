@@ -1,130 +1,74 @@
 const router = require('express').Router();
-let UserInfo = require('../models/userInfoModel');
-let UserEmail = require('../models/userEmailModel');
+const UserInfo = require('../models/userInfoModel');
+const UserEmail = require('../models/userEmailModel');
 const responseStructure = require('../utils/helpers');
+const { verifyAccessToken } = require('../middlewares/userMiddleware');
+const { errMessages } = require('../utils/constants');
 
-router.route('/user/update-info').post((req, res) => {
-  const accessToken = req.headers.authorization?.split(' ')[1];
+router.post(
+  '/user/update-info',
+  (req, res, next) =>
+    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  async (req, res, next) => {
+    const { body, email } = req;
 
-  UserEmail.findOne({ accessToken }).then((userFound) => {
-    if (!userFound || userFound === null) {
-      return responseStructure({
+    const userInfo = {
+      firstName: body.firstName ?? '',
+      lastName: body.lastName ?? '',
+      birthDate: body.birthDate ?? '',
+      phoneNumber: body.phoneNumber ?? '',
+    };
+
+    try {
+      const userDetails = await UserInfo.findOne({ email });
+      let created = false;
+
+      if (userDetails) {
+        await UserInfo.updateOne({ email }, { $set: userInfo });
+      } else {
+        await UserInfo.create({ email, ...userInfo });
+        created = true;
+      }
+
+      responseStructure({
         res,
-        statusCode: 400,
         data: {
-          err: 'USER_NOT_FOUND',
-          errMessage: `There's an issue with the token provided`,
+          msg: `User Info ${created ? 'Created' : 'Updated'}!`,
+          userInfo,
         },
       });
-    } else {
-      const { body } = req;
-
-      UserInfo.findOne({ email: userFound.email })
-        .then((userDetails) => {
-          if (!userDetails || userDetails === null) {
-            const userInfo = new UserInfo({ ...body, email: userFound.email });
-
-            userInfo
-              .save()
-              .then(() =>
-                responseStructure({
-                  res,
-                  data: { msg: 'User Info Updated!', userInfo: body },
-                })
-              )
-              .catch(() =>
-                responseStructure({
-                  res,
-                  statusCode: 400,
-                  data: {
-                    err: 'INVALID_CREDENTIALS',
-                    errMessage: 'Something is wrong with the user credentials',
-                  },
-                })
-              );
-          }
-
-          UserInfo.updateOne({ email: userDetails.email }, { $set: body })
-            .then(() =>
-              responseStructure({
-                res,
-                data: { msg: 'User Info Updated!', userInfo: body },
-              })
-            )
-            .catch(() =>
-              responseStructure({
-                res,
-                statusCode: 400,
-                data: {
-                  err: 'INVALID_CREDENTIALS',
-                  errMessage: 'Something is wrong with the user credentials',
-                },
-              })
-            );
-        })
-        .catch(() =>
-          responseStructure({
-            res,
-            statusCode: 400,
-            data: {
-              err: 'INVALID_REQUEST',
-              errMessage: 'Please contact support for assistance',
-            },
-          })
-        );
+    } catch (error) {
+      next(error);
     }
-  });
-});
+  }
+);
 
-router.route('/user/get-info').get((req, res) => {
-  const accessToken = req.headers.authorization?.split(' ')[1];
+router.get(
+  '/user/get-info',
+  (req, res, next) =>
+    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  async (req, res, next) => {
+    const { email } = req;
 
-  UserEmail.findOne({ accessToken }).then((userFound) => {
-    if (!userFound || userFound === null) {
-      return responseStructure({
+    try {
+      const userDetails = await UserInfo.findOne({ email });
+
+      const userInfo = {
+        email,
+        firstName: userDetails?.firstName ?? '',
+        lastName: userDetails?.lastName ?? '',
+        birthDate: userDetails?.birthDate ?? '',
+        phoneNumber: userDetails?.phoneNumber ?? '',
+      };
+
+      responseStructure({
         res,
-        statusCode: 400,
-        data: {
-          err: 'USER_NOT_FOUND',
-          errMessage: `There's an issue with the token provided`,
-        },
+        data: { msg: 'Found User Info!', userInfo },
       });
-    } else {
-      UserInfo.findOne({ email: userFound.email })
-        .then((userDetails) => {
-          if (!userDetails && userDetails === null) {
-            return responseStructure({
-              res,
-              statusCode: 400,
-              data: {
-                err: 'USER_NOT_FOUND',
-                errMessage: `User doesn't exist`,
-              },
-            });
-          }
-
-          const { firstName, lastName, birthDate, phoneNumber } = userDetails;
-
-          return responseStructure({
-            res,
-            data: {
-              msg: 'User Details found!',
-              userInfo: { firstName, lastName, birthDate, phoneNumber },
-            },
-          });
-        })
-        .catch(() =>
-          responseStructure({
-            res,
-            statusCode: 400,
-            data: {
-              err: 'INVALID_REQUEST',
-              errMessage: 'Please contact support for assistance',
-            },
-          })
-        );
+    } catch (error) {
+      next(error);
     }
-  });
-});
+  }
+);
 
 module.exports = router;
