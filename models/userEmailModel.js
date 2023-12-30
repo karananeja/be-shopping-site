@@ -1,4 +1,5 @@
 const { model, Schema } = require('mongoose');
+const { environment } = require('../utils/constants');
 
 const userEmailSchema = new Schema(
   {
@@ -8,8 +9,7 @@ const userEmailSchema = new Schema(
       lowercase: true,
       unique: true,
       validate: {
-        validator: (email) =>
-          /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email),
+        validator: (email) => environment.EMAIL_REGEX.test(email),
         message: 'Please enter a valid email',
       },
       required: [true, 'Email required'],
