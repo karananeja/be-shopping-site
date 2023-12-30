@@ -9,3 +9,5 @@ const environment = {
   JWT_SECRET: process.env.NODE_JWT_SECRET,
   SECS_IN_ONE_DAY: 24 * 60 * 60,
 };
+
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
