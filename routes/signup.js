@@ -1,46 +1,48 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-let UserEmail = require('../models/userEmailModel');
+const UserEmail = require('../models/userEmailModel');
 const responseStructure = require('../utils/helpers');
+const { environment, errMessages } = require('../utils/constants');
+const {
+  isEmailRegistered,
+  isValidEmail,
+} = require('../middlewares/userMiddleware');
 
-// add a new user entry
-router.route('/user/register').post(async (req, res) => {
-  const { body: user } = req;
-  let { email, password } = user;
+// register a new user
+router.post(
+  '/user/register',
+  (req, res, next) =>
+    isValidEmail(req, res, next, errMessages.INVALID_FORMAT_EMAIL),
+  (req, res, next) =>
+    isEmailRegistered(req, res, next, errMessages.EMAIL_ID_NOT_UNIQUE),
+  async (req, res, next) => {
+    const { email, password } = req.body;
 
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  password = hashedPassword;
+    if (!email || !password)
+      return res.status(404).send('Please provide proper credentials');
 
-  const accessToken = jwt.sign(
-    { email },
-    process.env.NODE_ACCESS_TOKEN_SECRET,
-    { expiresIn: 24 * 60 * 60 * 30 }
-  );
+    try {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-  user.accessToken = accessToken;
+      const accessToken = jwt.sign({ email }, environment.JWT_SECRET, {
+        expiresIn: 30 * environment.SECS_IN_ONE_DAY,
+      });
 
-  const newUserEmail = new UserEmail({ email, password, accessToken });
-
-  newUserEmail
-    .save()
-    .then(() =>
+      await UserEmail.create({ email, password: hashedPassword });
       responseStructure({
         res,
-        data: { msg: 'User registered!', userInfo: { email, accessToken } },
-      })
-    )
-    .catch(() =>
-      responseStructure({
-        res,
-        statusCode: 400,
+        statusCode: 201,
         data: {
-          err: 'EMAIL_ID_NOT_UNIQUE',
-          errMessage: 'User has already registered',
+          msg: 'User registered!',
+          userInfo: { email, accessToken },
         },
-      })
-    );
-});
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;

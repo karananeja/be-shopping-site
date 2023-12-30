@@ -1,82 +1,60 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-let UserEmail = require('../models/userEmailModel');
+const UserEmail = require('../models/userEmailModel');
 const responseStructure = require('../utils/helpers');
+const { environment, errMessages } = require('../utils/constants');
+const { isValidEmail } = require('../middlewares/userMiddleware');
 
-// user signin
-router.route('/user/get-token').post((req, res) => {
-  const { body: user } = req;
+// user sign in
+router.post(
+  '/user/get-token',
+  (req, res, next) =>
+    isValidEmail(req, res, next, errMessages.INVALID_FORMAT_EMAIL),
+  async (req, res, next) => {
+    const { email, password } = req.body;
 
-  UserEmail.findOne({ email: user.email })
-    .then(async (userFound) => {
+    if (!email || !password)
+      return res.status(404).send('Please provide proper credentials');
+
+    try {
+      const userFound = await UserEmail.findOne({ email });
       if (userFound) {
-        const isValid = await bcrypt.compare(user.password, userFound.password);
+        const isPasswordCorrect = await bcrypt.compare(
+          password,
+          userFound.password
+        );
 
-        if (isValid) {
-          const accessToken = jwt.sign(
-            { email: userFound.email },
-            process.env.NODE_ACCESS_TOKEN_SECRET,
-            { expiresIn: 24 * 60 * 60 * 30 }
-          );
+        if (isPasswordCorrect) {
+          const accessToken = jwt.sign({ email }, environment.JWT_SECRET, {
+            expiresIn: 30 * environment.SECS_IN_ONE_DAY,
+          });
 
-          userFound.accessToken = accessToken;
-
-          userFound
-            .save()
-            .then(() =>
-              responseStructure({
-                res,
-                data: {
-                  msg: 'User credentials matched',
-                  userInfo: {
-                    email: user.email,
-                    accessToken: userFound.accessToken,
-                  },
-                },
-              })
-            )
-            .catch(() =>
-              responseStructure({
-                res,
-                statusCode: 400,
-                data: {
-                  err: 'USER_NOT_FOUND',
-                  errMessage: 'User has not registered',
-                },
-              })
-            );
+          responseStructure({
+            res,
+            data: {
+              msg: 'User credentials matched',
+              userInfo: { email, accessToken },
+            },
+          });
         } else {
-          return responseStructure({
+          responseStructure({
             res,
             statusCode: 401,
-            data: {
-              err: 'INVALID_CREDENTIALS',
-              errMessage: 'Invalid credentials',
-            },
+            data: errMessages.INVALID_CREDENTIALS,
           });
         }
       } else {
-        return responseStructure({
+        responseStructure({
           res,
-          statusCode: 400,
-          data: {
-            err: 'USER_NOT_FOUND',
-            errMessage: `User has not registered or doesn't exists`,
-          },
+          statusCode: 404,
+          data: errMessages.USER_NOT_FOUND,
         });
       }
-    })
-    .catch(() =>
-      responseStructure({
-        res,
-        statusCode: 400,
-        data: {
-          err: 'INVALID_REQUEST',
-          errMessage: 'Please contact support for assistance',
-        },
-      })
-    );
-});
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;
