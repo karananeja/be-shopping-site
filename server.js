@@ -1,9 +1,8 @@
 // Importing the required dependencies into the application
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 const connectDB = require('./mongodb/connect');
-const { environment } = require('./utils/constants');
+const { environment, corsOptions } = require('./utils/constants');
 const errorHandler = require('./middlewares/errorMiddleware');
 
 // Initializing the application
@@ -29,9 +28,6 @@ app.use('/api/v1', utils);
 const port = environment.APP_PORT || 5000;
 const mongoDbURI = `mongodb+srv://admin:${environment.DB_PASSWORD}@cluster0.4e0w61l.mongodb.net/${environment.DB_NAME}?retryWrites=true&w=majority`;
 
-// Connecting to the database
-connectDB(mongoDbURI);
-
 // Restrict all miscellaneous routes
 app.get('*', (_, res) => res.status(404).send('Not found'));
 
@@ -39,4 +35,8 @@ app.get('*', (_, res) => res.status(404).send('Not found'));
 app.use(errorHandler);
 
 // Server started on the required port
-app.listen(port, () => console.log(`The port is listening on ${port}`));
+app.listen(port, () => {
+  console.log(`[server]: The port is listening on ${port}`);
+  // Connecting to the database
+  connectDB(mongoDbURI);
+});
