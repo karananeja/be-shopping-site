@@ -12,15 +12,17 @@ router.post(
   async (req, res, next) => {
     const { body, email } = req;
 
-    const userInfo = {
-      firstName: body.firstName ?? '',
-      lastName: body.lastName ?? '',
-      birthDate: body.birthDate ?? '',
-      phoneNumber: body.phoneNumber ?? '',
-    };
-
     try {
       const userDetails = await UserInfo.findOne({ email });
+
+      const userInfo = {
+        firstName: body.firstName ?? userDetails.firstName,
+        lastName: body.lastName ?? userDetails.lastName,
+        birthDate: +new Date(body.birthDate) ?? userDetails.birthDate,
+        phoneNumber: body.phoneNumber ?? userDetails.phoneNumber,
+        email: body.updatedEmail ?? userDetails.email,
+      };
+
       let created = false;
 
       if (userDetails) {
