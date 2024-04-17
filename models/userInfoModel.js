@@ -6,7 +6,7 @@ const userInfoSchema = new Schema(
     firstName: { type: String, trim: true },
     lastName: { type: String, trim: true },
     phoneNumber: { type: String, trim: true },
-    birthDate: { type: String, trim: true },
+    birthDate: { type: Number, trim: true },
   },
   { timestamps: true }
 );

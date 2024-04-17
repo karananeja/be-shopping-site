@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const countryList = [
   { countryCode: 'IND', dialCode: '+91', countryName: 'India' },
 ];
@@ -39,4 +41,9 @@ const errMessages = {
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-module.exports = { countryList, EMAIL_REGEX, environment, errMessages };
+module.exports = {
+  countryList,
+  EMAIL_REGEX,
+  environment,
+  errMessages,
+};
