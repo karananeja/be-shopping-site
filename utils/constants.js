@@ -37,6 +37,10 @@ const errMessages = {
     err: 'INVALID_TOKEN',
     errMessage: `There's an issue with the token provided`,
   },
+  ADDRESS_NOT_FOUND: {
+    err: 'ADDRESS_NOT_FOUND',
+    errMessage: `User Address is not added or doesn't exists`,
+  },
 };
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;

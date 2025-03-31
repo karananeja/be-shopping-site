@@ -135,4 +135,32 @@ router.get(
   }
 );
 
+router.delete(
+  '/user/delete-address',
+  (req, res, next) =>
+    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  (req, res, next) => userExists(req, res, next, errMessages.USER_NOT_FOUND),
+  async (req, res, next) => {
+    const { id: _id } = req.body;
+
+    try {
+      const userAddress = await UserAddress.deleteOne({ _id });
+
+      if (userAddress.deletedCount === 0)
+        return responseStructure({
+          res,
+          statusCode: 404,
+          data: errMessages.ADDRESS_NOT_FOUND,
+        });
+
+      responseStructure({
+        res,
+        data: { msg: 'User Address deleted successfully', userAddress },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = router;
