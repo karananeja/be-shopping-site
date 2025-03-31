@@ -2,25 +2,22 @@ const router = require('express').Router();
 const UserInfo = require('../models/userInfoModel');
 const UserAddress = require('../models/addressModel');
 const responseStructure = require('../utils/helpers');
-const { verifyAccessToken } = require('../middlewares/userMiddleware');
+const {
+  verifyAccessToken,
+  userExists,
+} = require('../middlewares/userMiddleware');
 const { errMessages } = require('../utils/constants');
 
 router.post(
   '/user/update-info',
   (req, res, next) =>
     verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  (req, res, next) => userExists(req, res, next, errMessages.USER_NOT_FOUND),
   async (req, res, next) => {
     const { body, email } = req;
 
     try {
       const userDetails = await UserInfo.findOne({ email });
-
-      if (!userDetails)
-        return responseStructure({
-          res,
-          statusCode: 404,
-          data: errMessages.USER_NOT_FOUND,
-        });
 
       const userInfo = {
         firstName: body.firstName ?? userDetails.firstName,
@@ -56,18 +53,12 @@ router.get(
   '/user/get-info',
   (req, res, next) =>
     verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  (req, res, next) => userExists(req, res, next, errMessages.USER_NOT_FOUND),
   async (req, res, next) => {
     const { email } = req;
 
     try {
       const userDetails = await UserInfo.findOne({ email });
-
-      if (!userDetails)
-        return responseStructure({
-          res,
-          statusCode: 404,
-          data: errMessages.USER_NOT_FOUND,
-        });
 
       const userInfo = {
         email,
@@ -91,6 +82,7 @@ router.post(
   '/user/add-address',
   (req, res, next) =>
     verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  (req, res, next) => userExists(req, res, next, errMessages.USER_NOT_FOUND),
   async (req, res, next) => {
     const { body, email } = req;
 
