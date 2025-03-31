@@ -114,4 +114,25 @@ router.post(
   }
 );
 
+router.get(
+  '/user/list-address',
+  (req, res, next) =>
+    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  (req, res, next) => userExists(req, res, next, errMessages.USER_NOT_FOUND),
+  async (req, res, next) => {
+    const { email } = req;
+
+    try {
+      const userAddresses = await UserAddress.find({ email });
+
+      responseStructure({
+        res,
+        data: { msg: 'User Addresses fetched successfully', userAddresses },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = router;
