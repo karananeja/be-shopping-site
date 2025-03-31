@@ -41,9 +41,12 @@ const errMessages = {
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
+const PHONE_NO_REGEX = /^\d{10}$/;
+
 module.exports = {
   countryList,
   EMAIL_REGEX,
   environment,
   errMessages,
+  PHONE_NO_REGEX,
 };

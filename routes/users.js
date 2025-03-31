@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const UserInfo = require('../models/userInfoModel');
-const UserEmail = require('../models/userEmailModel');
 const responseStructure = require('../utils/helpers');
 const { verifyAccessToken } = require('../middlewares/userMiddleware');
 const { errMessages } = require('../utils/constants');
@@ -38,6 +37,26 @@ router.post(
           msg: `User Info ${created ? 'Created' : 'Updated'}!`,
           userInfo,
         },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/user/add-address',
+  (req, res, next) =>
+    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  async (req, res, next) => {
+    const { body, email } = req;
+
+    try {
+      // const
+
+      responseStructure({
+        res,
+        data: {},
       });
     } catch (error) {
       next(error);
