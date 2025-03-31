@@ -6,7 +6,9 @@ const responseStructure = require('../utils/helpers');
 async function isEmailRegistered(req, res, next, data) {
   const { email } = req.body;
 
-  const isEmailPresent = await UserEmail.findOne({ email });
+  const emailInLowerCase = email.toLowerCase();
+
+  const isEmailPresent = await UserEmail.findOne({ email: emailInLowerCase });
 
   if (!isEmailPresent) {
     next();
@@ -18,7 +20,9 @@ async function isEmailRegistered(req, res, next, data) {
 function isValidEmail(req, res, next, data) {
   const { email } = req.body;
 
-  if (EMAIL_REGEX.test(email)) {
+  const emailInLowerCase = email.toLowerCase();
+
+  if (EMAIL_REGEX.test(emailInLowerCase)) {
     next();
   } else {
     responseStructure({ res, statusCode: 422, data });
