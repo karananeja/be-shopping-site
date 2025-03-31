@@ -22,21 +22,28 @@ router.post(
     if (!email || !password)
       return res.status(404).send('Please provide proper credentials');
 
+    const emailInLowerCase = email.toLowerCase();
+
     try {
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      const accessToken = jwt.sign({ email }, environment.JWT_SECRET, {
-        expiresIn: 30 * environment.SECS_IN_ONE_DAY,
-      });
+      const accessToken = jwt.sign(
+        { email: emailInLowerCase },
+        environment.JWT_SECRET,
+        { expiresIn: 30 * environment.SECS_IN_ONE_DAY }
+      );
 
-      await UserEmail.create({ email, password: hashedPassword });
+      await UserEmail.create({
+        email: emailInLowerCase,
+        password: hashedPassword,
+      });
       responseStructure({
         res,
         statusCode: 201,
         data: {
           msg: 'User registered!',
-          userInfo: { email, accessToken },
+          userInfo: { email: emailInLowerCase, accessToken },
         },
       });
     } catch (error) {
