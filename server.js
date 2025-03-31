@@ -29,7 +29,13 @@ const port = environment.APP_PORT || 5000;
 const mongoDbURI = `mongodb+srv://admin:${environment.DB_PASSWORD}@cluster0.4e0w61l.mongodb.net/${environment.DB_NAME}?retryWrites=true&w=majority`;
 
 // Restrict all miscellaneous routes
-app.get('*', (_, res) => res.status(404).send('Not found'));
+app.get('*', (_, res) => {
+  res.status(404).json({
+    status: 404,
+    msg: 'Not Found',
+    error: 'The resource you requested does not exist.',
+  });
+});
 
 // Global Error catch handler
 app.use(errorHandler);
