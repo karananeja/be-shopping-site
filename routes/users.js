@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const UserInfo = require('../models/userInfoModel');
+const UserAddress = require('../models/addressModel');
 const responseStructure = require('../utils/helpers');
 const { verifyAccessToken } = require('../middlewares/userMiddleware');
 const { errMessages } = require('../utils/constants');
@@ -51,26 +52,6 @@ router.post(
   }
 );
 
-router.post(
-  '/user/add-address',
-  (req, res, next) =>
-    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
-  async (req, res, next) => {
-    const { body, email } = req;
-
-    try {
-      // const
-
-      responseStructure({
-        res,
-        data: {},
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
 router.get(
   '/user/get-info',
   (req, res, next) =>
@@ -99,6 +80,41 @@ router.get(
       responseStructure({
         res,
         data: { msg: 'Found User Info!', userInfo },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/user/add-address',
+  (req, res, next) =>
+    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  async (req, res, next) => {
+    const { body, email } = req;
+
+    try {
+      const userAddressBody = {
+        addressLine1: body.addressLine1 ?? '',
+        addressLine2: body.addressLine2 ?? '',
+        type: body.type ?? '',
+        name: body.name ?? '',
+        phone: body.phone ?? 0,
+        city: body.city ?? '',
+        state: body.state ?? '',
+        pincode: body.pincode ?? 0,
+        isDefault: body.isDefault ?? false,
+      };
+
+      const userAddress = await UserAddress.create({
+        email,
+        ...userAddressBody,
+      });
+
+      responseStructure({
+        res,
+        data: { msg: 'User Address added successfully', userAddress },
       });
     } catch (error) {
       next(error);

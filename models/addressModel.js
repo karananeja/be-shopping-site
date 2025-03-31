@@ -3,10 +3,11 @@ const { PHONE_NO_REGEX } = require('../utils/constants');
 
 const userAddressSchema = new Schema(
   {
+    email: { type: String, required: true },
     type: { type: String, required: true },
     name: { type: String, required: true },
     phone: {
-      type: String,
+      type: Number,
       required: true,
       match: [PHONE_NO_REGEX, 'Please enter a valid 10 digit phone number'],
     },
