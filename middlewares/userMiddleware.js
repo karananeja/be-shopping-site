@@ -37,7 +37,7 @@ function verifyAccessToken(req, res, next, data) {
     req.email = decodedData.email;
     next();
   } catch (err) {
-    responseStructure({ res, statusCode: 403, data });
+    responseStructure({ res, statusCode: 401, data });
   }
 }
 
