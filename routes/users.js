@@ -14,6 +14,13 @@ router.post(
     try {
       const userDetails = await UserInfo.findOne({ email });
 
+      if (!userDetails)
+        return responseStructure({
+          res,
+          statusCode: 404,
+          data: errMessages.USER_NOT_FOUND,
+        });
+
       const userInfo = {
         firstName: body.firstName ?? userDetails.firstName,
         lastName: body.lastName ?? userDetails.lastName,
@@ -73,6 +80,13 @@ router.get(
 
     try {
       const userDetails = await UserInfo.findOne({ email });
+
+      if (!userDetails)
+        return responseStructure({
+          res,
+          statusCode: 404,
+          data: errMessages.USER_NOT_FOUND,
+        });
 
       const userInfo = {
         email,
