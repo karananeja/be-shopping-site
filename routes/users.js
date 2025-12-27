@@ -1,5 +1,7 @@
 const router = require('express').Router();
+const bcrypt = require('bcrypt');
 const UserInfo = require('../models/userInfoModel');
+const UserEmail = require('../models/userEmailModel');
 const UserAddress = require('../models/addressModel');
 const responseStructure = require('../utils/helpers');
 const {
@@ -71,6 +73,58 @@ router.get(
       responseStructure({
         res,
         data: { msg: 'Found User Info!', userInfo },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.put(
+  '/user/reset-password',
+  (req, res, next) =>
+    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  (req, res, next) => userExists(req, res, next, errMessages.USER_NOT_FOUND),
+  async (req, res, next) => {
+    const { currentPassword, newPassword } = req.body;
+    const { email } = req;
+
+    if (!currentPassword || !newPassword)
+      return res.status(404).send('Please provide current and new password');
+
+    try {
+      const userEmail = await UserEmail.findOne({ email });
+
+      if (!userEmail)
+        return responseStructure({
+          res,
+          statusCode: 404,
+          data: errMessages.USER_NOT_FOUND,
+        });
+
+      const isPasswordCorrect = await bcrypt.compare(
+        currentPassword,
+        userEmail.password
+      );
+
+      if (!isPasswordCorrect)
+        return responseStructure({
+          res,
+          statusCode: 401,
+          data: errMessages.INVALID_CREDENTIALS,
+        });
+
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      await UserEmail.updateOne(
+        { email },
+        { $set: { password: hashedPassword } }
+      );
+
+      responseStructure({
+        res,
+        data: { msg: 'Password reset successfully' },
       });
     } catch (error) {
       next(error);
@@ -156,6 +210,56 @@ router.delete(
       responseStructure({
         res,
         data: { msg: 'User Address deleted successfully', userAddress },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.put(
+  '/user/update-address',
+  (req, res, next) =>
+    verifyAccessToken(req, res, next, errMessages.INVALID_TOKEN),
+  (req, res, next) => userExists(req, res, next, errMessages.USER_NOT_FOUND),
+  async (req, res, next) => {
+    const { id: _id, ...body } = req.body;
+    const { email } = req;
+
+    try {
+      const existingAddress = await UserAddress.findOne({ _id, email });
+
+      if (!existingAddress)
+        return responseStructure({
+          res,
+          statusCode: 404,
+          data: errMessages.ADDRESS_NOT_FOUND,
+        });
+
+      const updatedAddressData = {
+        addressLine1: body.addressLine1 ?? existingAddress.addressLine1,
+        addressLine2: body.addressLine2 ?? existingAddress.addressLine2,
+        type: body.type ?? existingAddress.type,
+        name: body.name ?? existingAddress.name,
+        phone: body.phone ?? existingAddress.phone,
+        city: body.city ?? existingAddress.city,
+        state: body.state ?? existingAddress.state,
+        pincode: body.pincode ?? existingAddress.pincode,
+        isDefault: body.isDefault ?? existingAddress.isDefault,
+      };
+
+      const updatedAddress = await UserAddress.findOneAndUpdate(
+        { _id, email },
+        { $set: updatedAddressData },
+        { new: true }
+      );
+
+      responseStructure({
+        res,
+        data: {
+          msg: 'User Address updated successfully',
+          userAddress: updatedAddress,
+        },
       });
     } catch (error) {
       next(error);
