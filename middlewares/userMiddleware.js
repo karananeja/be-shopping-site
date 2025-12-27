@@ -1,24 +1,26 @@
 const jwt = require('jsonwebtoken');
 const UserEmail = require('../models/userEmailModel');
+const UserInfo = require('../models/userInfoModel');
 const { EMAIL_REGEX, environment } = require('../utils/constants');
 const responseStructure = require('../utils/helpers');
 
 async function isEmailRegistered(req, res, next, data) {
   const { email } = req.body;
 
-  const isEmailPresent = await UserEmail.findOne({ email });
+  const emailInLowerCase = email.toLowerCase();
 
-  if (!isEmailPresent) {
-    next();
-  } else {
-    responseStructure({ res, statusCode: 409, data });
-  }
+  const isEmailPresent = await UserEmail.findOne({ email: emailInLowerCase });
+
+  if (!isEmailPresent) next();
+  else responseStructure({ res, statusCode: 409, data });
 }
 
 function isValidEmail(req, res, next, data) {
   const { email } = req.body;
 
-  if (EMAIL_REGEX.test(email)) {
+  const emailInLowerCase = email.toLowerCase();
+
+  if (EMAIL_REGEX.test(emailInLowerCase)) {
     next();
   } else {
     responseStructure({ res, statusCode: 422, data });
@@ -32,9 +34,23 @@ function verifyAccessToken(req, res, next, data) {
     const decodedData = jwt.verify(accessToken, environment.JWT_SECRET);
     req.email = decodedData.email;
     next();
-  } catch (err) {
-    responseStructure({ res, statusCode: 403, data });
+  } catch {
+    responseStructure({ res, statusCode: 401, data });
   }
 }
 
-module.exports = { isEmailRegistered, isValidEmail, verifyAccessToken };
+async function userExists(req, res, next, data) {
+  const { email } = req;
+
+  const userDetails = await UserInfo.findOne({ email });
+
+  if (userDetails) next();
+  else responseStructure({ res, statusCode: 404, data });
+}
+
+module.exports = {
+  isEmailRegistered,
+  isValidEmail,
+  userExists,
+  verifyAccessToken,
+};

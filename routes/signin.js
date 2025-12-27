@@ -17,8 +17,11 @@ router.post(
     if (!email || !password)
       return res.status(404).send('Please provide proper credentials');
 
+    const emailInLowerCase = email.toLowerCase();
+
     try {
-      const userFound = await UserEmail.findOne({ email });
+      const userFound = await UserEmail.findOne({ email: emailInLowerCase });
+
       if (userFound) {
         const isPasswordCorrect = await bcrypt.compare(
           password,
@@ -26,15 +29,17 @@ router.post(
         );
 
         if (isPasswordCorrect) {
-          const accessToken = jwt.sign({ email }, environment.JWT_SECRET, {
-            expiresIn: 30 * environment.SECS_IN_ONE_DAY,
-          });
+          const accessToken = jwt.sign(
+            { email: emailInLowerCase },
+            environment.JWT_SECRET,
+            { expiresIn: 30 * environment.SECS_IN_ONE_DAY }
+          );
 
           responseStructure({
             res,
             data: {
               msg: 'User credentials matched',
-              userInfo: { email, accessToken },
+              userInfo: { email: emailInLowerCase, accessToken },
             },
           });
         } else {
