@@ -1,39 +1,43 @@
 const fs = require('fs');
+const path = require('path');
 const { errMessages } = require('../utils/constants');
 const responseStructure = require('../utils/helpers');
 
-function errorHandler(error, _, res, next) {
-  if (error) {
-    process.chdir('logs');
-    const filePath = './errorLogs.json';
+function errorHandler(error, req, res, next) {
+  if (!error) return next();
 
-    fs.readFile(filePath, 'utf-8', (err, data) => {
-      if (err) throw err;
+  const logEntry = {
+    time: new Date().toISOString(),
+    message: `${error.name}: ${error.message}`,
+    stack: error.stack,
+    path: req.originalUrl,
+    method: req.method,
+  };
 
-      const logs = JSON.parse(data);
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      const filePath = path.join(__dirname, '..', 'errorLogs.json');
 
-      logs.push({
-        time: new Date().toISOString(),
-        message: `${error.name}: ${error.message}`,
-        stack: error.stack,
-      });
+      let logs = [];
+      if (fs.existsSync(filePath)) {
+        logs = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      }
 
-      fs.writeFile(
-        filePath,
-        JSON.stringify(logs, null, 2),
-        { encoding: 'utf8' },
-        () => console.log(`Error logged at ${new Date()}`)
-      );
-    });
+      logs.push(logEntry);
 
-    responseStructure({
-      res,
-      statusCode: 500,
-      data: errMessages.INTERNAL_SERVER_ERROR,
-    });
-  } else {
-    next();
+      fs.writeFileSync(filePath, JSON.stringify(logs, null, 2));
+    } catch (fsError) {
+      console.error('Failed to write local error log:', fsError);
+    }
   }
+
+  console.error(logEntry);
+
+  responseStructure({
+    res,
+    statusCode: 500,
+    data: errMessages.INTERNAL_SERVER_ERROR,
+  });
 }
 
 module.exports = errorHandler;
