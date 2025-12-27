@@ -6,7 +6,8 @@ A Node.js/Express backend application that provides the infrastructure for a sho
 
 - 🔐 User authentication (Sign up & Sign in)
 - 👤 User profile management (Create, Read, Update)
-- 📍 Address management (Add, List, Delete addresses)
+- 🔑 Password reset functionality
+- 📍 Address management (Add, List, Update, Delete addresses)
 - 🔒 JWT-based authentication
 - 🛡️ Password hashing with bcrypt
 - ⚠️ Centralized error handling
@@ -112,6 +113,19 @@ All endpoints are prefixed with `/api/v1`
 - **Headers**: `Authorization: Bearer <access_token>`
 - **Response**: Returns user profile information
 
+#### Reset Password
+
+- **PUT** `/user/reset-password`
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Body**:
+  ```json
+  {
+    "currentPassword": "oldpassword123",
+    "newPassword": "newpassword123"
+  }
+  ```
+- **Response**: Returns success message on password reset
+
 ### Address Management
 
 #### Add Address
@@ -138,6 +152,27 @@ All endpoints are prefixed with `/api/v1`
 - **GET** `/user/list-address`
 - **Headers**: `Authorization: Bearer <access_token>`
 - **Response**: Returns list of all user addresses
+
+#### Update Address
+
+- **PUT** `/user/update-address`
+- **Headers**: `Authorization: Bearer <access_token>`
+- **Body**:
+  ```json
+  {
+    "id": "address_id_here",
+    "addressLine1": "123 Main St",
+    "addressLine2": "Apt 4B",
+    "type": "home",
+    "name": "John Doe",
+    "phone": "1234567890",
+    "city": "New York",
+    "state": "NY",
+    "pincode": 10001,
+    "isDefault": true
+  }
+  ```
+- **Response**: Returns updated address information
 
 #### Delete Address
 
