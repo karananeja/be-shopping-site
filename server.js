@@ -2,8 +2,9 @@
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./mongodb/connect');
-const { environment, corsOptions } = require('./utils/constants');
+const { environment } = require('./utils/constants');
 const errorHandler = require('./middlewares/errorMiddleware');
+const dbMiddleware = require('./middlewares/dbMiddleware');
 
 // Initializing the application
 const app = express();
@@ -19,9 +20,9 @@ const userDetailsRouter = require('./routes/users');
 const utils = require('./routes/utils');
 
 // API endpoints
-app.use('/api/v1', usersSignUpRouter);
-app.use('/api/v1', usersSignInRouter);
-app.use('/api/v1', userDetailsRouter);
+app.use('/api/v1', dbMiddleware, usersSignUpRouter);
+app.use('/api/v1', dbMiddleware, usersSignInRouter);
+app.use('/api/v1', dbMiddleware, userDetailsRouter);
 app.use('/api/v1', utils);
 
 // Setting up the port and database connection url
